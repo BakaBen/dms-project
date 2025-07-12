@@ -1,0 +1,37 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+class RolePermissionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        Permission::create(['name' => 'create users']);
+        Permission::create(['name' => 'read users']);
+        Permission::create(['name' => 'update users']);
+        Permission::create(['name' => 'delete users']);
+
+        Permission::create(['name' => 'create roles']);
+        Permission::create(['name' => 'read roles']);
+        Permission::create(['name' => 'update roles']);
+        Permission::create(['name' => 'delete roles']);
+
+        Permission::create(['name' => 'create permissions']);
+        Permission::create(['name' => 'read permissions']);
+        Permission::create(['name' => 'update permissions']);
+        Permission::create(['name' => 'delete permissions']);
+
+        Role::create(['name' => 'superadmin'])->givePermissionTo(Permission::all());
+        Role::create(['name' => 'admin'])->givePermissionTo([
+            'read users',
+        ]);
+    }
+}
