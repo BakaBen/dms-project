@@ -19,6 +19,7 @@
                     <flux:navlist.item icon="adjustments-horizontal" :href="route('permissions.index')" :current="request()->routeIs('permissions.index')" wire:navigate>{{ __('Permission') }}</flux:navlist.item>
                     <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('User') }}</flux:navlist.item>
                     @endif
+                    <flux:navlist.item icon="document" :href="route('documents.index')" :current="request()->routeIs('documents.index')" wire:navigate>{{ __('Document') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
