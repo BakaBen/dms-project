@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -28,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('permissions', PermissionController::class);
     Route::resource('users', UserController::class);
     Route::resource('documents', DocumentController::class);
+    Route::resource('comments', CommentController::class);
 });
 
 require __DIR__.'/auth.php';

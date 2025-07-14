@@ -9,4 +9,20 @@ class Comment extends Model
 {
     /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'comment',
+        'user_id',
+        'document_id',
+    ];
+
+    public function document()
+    {
+        return $this->belongsTo(Document::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
