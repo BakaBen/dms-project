@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use App\Models\DocumentLog;
+use App\Models\DocumentVersion;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +17,7 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        $documents = Document::paginate(10);
+        $documents = Document::where('status', 'unvalidated')->paginate(10);
         return view('documents.index', compact('documents'));
     }
 
@@ -31,33 +33,101 @@ class DocumentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('login')->with(['status' => 'error', 'message' => 'You must be logged in to create a document.']);
         }
 
-        $validatedData = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'required|file|mimes:pdf,docx,xlsx,pptx,zip|max:10240', //max 10 MB
+            'file' => 'required|file|mimes:pdf|max:10240', // maks 10MB
         ]);
 
-        $validatedData['file'] = $request->file('file')->store('documents', 'public');
-
         try {
-            $document = new Document();
-            $document->name = $validatedData['name'];
-            $document->description = $validatedData['description'];
-            $document->user_id = Auth::user()->id;
-            $document->file_path = $validatedData['file']; // Simpan path file
+            $path = $request->file('file')->store('documents', 'public');
+
+            $document = Document::create([
+                'name' => $request->name,
+                'current_version_id' => null,
+                'description' => $request->description,
+                'file_path' => null,
+                'user_id' => Auth::user()->id,
+            ]);
+
+            $version = DocumentVersion::create([
+                'document_id' => $document->id,
+                'version_number' => 1,
+                'file_path' => $path,
+                'user_id' => Auth::user()->id,
+            ]);
+
+            $document->current_version_id = $version->id;
+            $document->file_path = $version->file_path;
             $document->save();
 
-            return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document created successfully.']);
-        } catch (\Exception $e) {
-            return redirect()->route('documents.create')->with(['status' => 'error', 'message' => 'Failed to create document: ' . $e->getMessage()]);
+            DocumentLog::create([
+                'document_id' => $document->id,
+                'user_id' => Auth::user()->id,
+                'action' => 'create',
+                'description' => 'Dokumen dibuat dengan versi 1'
+            ]);
+
+            return redirect()->route('documents.index')->with([
+                'status' => 'success',
+                'message' => 'Document created successfully.'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('documents.create')->with([
+                'status' => 'error',
+                'message' => 'Failed to create document: ' . $e->getMessage()
+            ]);
         }
     }
+
+    /**
+     * Rollback document
+     */
+    public function rollback(Document $document) {
+        if (Auth::id() !== $document->user_id) {
+            return redirect()->route('documents.index')->with(['status' => 'error', 'message' => 'You are not authorized to edit this document.']);
+        }
+
+        $currentVersion = $document->currentVersion;
+        $previousVersion = DocumentVersion::where('document_id', $document->id)
+            ->where('version_number', '<', $currentVersion->version_number)
+            ->orderBy('version_number', 'desc')
+            ->first();
+
+        if (!$previousVersion) {
+            return redirect()->back()->with([
+                'status' => 'error',
+                'message' => 'No previous version available.'
+            ]);
+        }
+
+        // Update ke versi sebelumnya
+        $document->update([
+            'current_version_id' => $previousVersion->id,
+            'file_path' => $previousVersion->file_path
+        ]);
+
+        // Log activity
+        DocumentLog::create([
+            'document_id' => $document->id,
+            'user_id' => Auth::id(),
+            'action' => 'rollback_previous',
+            'description' => "Rolled back from version {$currentVersion->version_number} to version {$previousVersion->version_number}"
+        ]);
+
+        return redirect()->back()->with([
+            'status' => 'success',
+            'message' => "Document rolled back to version {$previousVersion->version_number}"
+        ]);
+    }
+
 
     /**
      * Display the specified resource.
@@ -66,6 +136,9 @@ class DocumentController extends Controller
     {
         $document->load(['user', 'comments.user']);
         $document->comments = $document->comments->sortByDesc('created_at');
+
+        $document = Document::with('currentVersion')->findOrFail($document->id);
+        // $document->current_version_id;
 
         return view('documents.show', compact('document'));
     }
@@ -95,22 +168,38 @@ class DocumentController extends Controller
             $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'nullable|file|mimes:pdf,docx,xlsx,pptx,zip|max:10240', //max 10 MB
+            'file' => 'nullable|file|mimes:pdf|max:10240', //max 10 MB
         ]);
 
-        if ($request->hasFile('file')) {
-            if($document->file_path && Storage::disk('public')->exists($document->file_path)){
-                Storage::disk('public')->delete($document->file_path);
-            }
-            $validatedData['file'] = $request->file('file')->store('documents', 'public');
-        }
+        $path = $request->file('file')->store('documents', 'public');
 
-        $document->name = $validatedData['name'];
-        $document->description = $validatedData['description'];
-        $document->file_path = $validatedData['file'] ?? $document->file_path;
-        $document->save();
+            $currentVersion = DocumentVersion::find($document->current_version_id);
+            $version = DocumentVersion::create([
+                'document_id' => $document->id,
+                'version_number' => $currentVersion->version_number + 1,
+                'file_path' => $path,
+                'user_id' => Auth::user()->id,
+            ]);
 
-        return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document updated successfully.']);
+            Document::where('id', $document->id)
+                    ->update([
+                        'name' => $request->name,
+                        'description' => $request->description,
+                        'current_version_id' => $version->id,
+                        'file_path' => $path
+                    ]);
+
+            DocumentLog::create([
+                'document_id' => $document->id,
+                'user_id' => Auth::user()->id,
+                'action' => 'update',
+                'description' => 'Dokumen diperbarui dengan versi ' . $version->version_number
+            ]);
+
+            return redirect()->route('documents.index')->with([
+                'status' => 'success',
+                'message' => 'Document updated successfully.'
+            ]);
         } catch (\Exception $e) {
             return redirect()->withError($e->getMessage())->route('documents.edit', $document)->with(['status' => 'error', 'message' => 'Failed to update document.']);
         }
@@ -136,14 +225,21 @@ class DocumentController extends Controller
         return view('documents.trashed', compact('documents'));
     }
 
-    public function restore(Document $document)
+    public function restore($id)
     {
+        $document = Document::onlyTrashed()->findOrFail($id);
         $document->restore();
         return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document restored successfully.']);
     }
 
-    public function forceDelete(Document $document)
+    public function forceDelete($id)
     {
+        $document = Document::onlyTrashed()->findOrFail($id);
+
+        if ($document->file_path && Storage::exists('storage/' . $document->file_path)) {
+            Storage::delete('storage/' . $document->file_path);
+        }
+
         $document->forceDelete();
         return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document deleted permanently.']);
     }

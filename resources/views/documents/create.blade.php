@@ -21,8 +21,10 @@
 
         <div class="flex flex-col gap-y-4 mt-6 w-md">
             <flux:input label="Document Name" name="name" value="{{ old('name') }}" />
-            <flux:textarea label="Document Description" name="description" value="{{ old('description') }}" />
-            <flux:input label="File" type="file" name="file" value="{{ old('file') }}" />
+            <flux:textarea label="Document Description" name="description">
+                {{ old('description') }}
+            </flux:textarea>
+            <flux:input label="File" description="File must be in PDF format" type="file" name="file" value="{{ old('file') }}" />
         </div>
 
         <div class="flex justify-between items-center mt-10">

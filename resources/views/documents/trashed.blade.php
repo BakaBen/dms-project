@@ -1,15 +1,9 @@
 <x-layouts.app :title="__('Document Management')">
-    <flux:heading size="xl" level="1">{{ __('Documents') }}</flux:heading>
+    <flux:heading size="xl" level="1">{{ __('Trashed Documents') }}</flux:heading>
     <flux:text class="mt-2 mb-6 text-base">
-        Manage your documents
+        Restore or permanently delete your documents
     </flux:text>
     <flux:separator variant="subtle" />
-
-    <div class="flex justify-end mt-2">
-        @can('create documents')
-            <a href="{{ route('documents.create') }}" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">Create Document</a>
-        @endcan
-    </div>
 
     <div class="relative overflow-x-auto rounded-md mt-2">
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -51,22 +45,16 @@
                     </td>
                     <td class="flex items-center gap-2 px-6 py-4">
                         @can('read documents')
-                        <a href="{{ route('documents.show', $document) }}" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">View</a>
-                        @endcan
-                        @can('update documents')
-                        <a href="{{ route('documents.edit', $document) }}" class="text-yellow-400 hover:text-white border border-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900">Revision</a>
+                        <form action="{{ route('documents.restore', $document) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-900" onclick="return confirm('Are you sure?')">Restore</button>
+                        </form>
                         @endcan
                         @can('delete documents')
-                        <form action="{{ route('documents.destroy', $document->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('documents.force-delete', $document->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
-                        @endcan
-                        @can('create revisions')
-                        <form action="{{ route('documents.rollback', $document->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" onclick="return confirm('Are you sure you want to rollback to the previous version?')">Rollback</button>
                         </form>
                         @endcan
                     </td>

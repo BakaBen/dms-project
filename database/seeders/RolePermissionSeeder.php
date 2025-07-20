@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Pest\Plugins\Parallel\Handlers\Pest;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -24,10 +25,10 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'update roles']);
         Permission::create(['name' => 'delete roles']);
 
-        Permission::create(['name' => 'create permissions']);
-        Permission::create(['name' => 'read permissions']);
-        Permission::create(['name' => 'update permissions']);
-        Permission::create(['name' => 'delete permissions']);
+        // Permission::create(['name' => 'create permissions']);
+        // Permission::create(['name' => 'read permissions']);
+        // Permission::create(['name' => 'update permissions']);
+        // Permission::create(['name' => 'delete permissions']);
 
         Permission::create(['name' => 'create documents']);
         Permission::create(['name' => 'read documents']);
@@ -36,9 +37,11 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'restore documents']);
         Permission::create(['name' => 'force delete documents']);
 
-        Role::create(['name' => 'superadmin'])->givePermissionTo(Permission::all());
-        Role::create(['name' => 'admin'])->givePermissionTo([
-            'read users',
-        ]);
+        Permission::create(['name' => 'update approval']);
+        Permission::create(['name' => 'update rejection']);
+
+        Permission::create(['name' => 'create revisions']);
+
+        Role::create(['name' => 'admin'])->givePermissionTo(Permission::all());
     }
 }

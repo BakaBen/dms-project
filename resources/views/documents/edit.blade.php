@@ -22,7 +22,9 @@
 
         <div class="flex flex-col gap-y-4 mt-6 w-md">
             <flux:input label="Document Name" name="name" value="{{ old('name', $document->name) }}" />
-            <flux:textarea label="Document Description" name="description" value="{{ old('description', $document->description) }}" />
+            <flux:textarea label="Document Description" name="description">
+                {{ old('description', $document->description) }}
+            </flux:textarea>
             <flux:input label="File" type="file" name="file" value="{{ old('file_path', $document->file_path) }}" />
         </div>
 

@@ -25,4 +25,9 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function documentVersion()
+    {
+        return $this->belongsTo(DocumentVersion::class);
+    }
 }

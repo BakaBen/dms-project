@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Livewire\Settings\Appearance;
@@ -26,10 +25,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
     Route::resource('roles', RoleController::class);
-    Route::resource('permissions', PermissionController::class);
     Route::resource('users', UserController::class);
     Route::resource('documents', DocumentController::class);
     Route::resource('comments', CommentController::class);
+
+    Route::get('/trashed', [DocumentController::class, 'trashed'])->name('documents.trashed');
+    Route::post('/documents/{document}/restore', [DocumentController::class, 'restore'])->name('documents.restore');
+    Route::delete('/documents/{document}/force-delete', [DocumentController::class, 'forceDelete'])->name('documents.force-delete');
+
+    Route::get('/preview/{document}', [DocumentController::class, 'preview'])->name('documents.preview');
+
+    Route::post('/documents/rollback/{document}', [DocumentController::class, 'rollback'])->name('documents.rollback');
+
 });
 
 require __DIR__.'/auth.php';
