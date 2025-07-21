@@ -46,6 +46,7 @@
                 @endif
             </div>
         </div>
+
         <div class="mt-4">
             <iframe src="{{ asset('storage/' . $version->file_path) }}" width="100%" height="600px"></iframe>
         </div>

@@ -19,6 +19,8 @@
                     <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('User') }}</flux:navlist.item>
                     @endif
                     <flux:navlist.item icon="document" :href="route('documents.index')" :current="request()->routeIs('documents.index')" wire:navigate>{{ __('Document') }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-check" :href="route('documents.published')" :current="request()->routeIs('documents.published')" wire:navigate>{{ __('Published') }}</flux:navlist.item>
+                    <flux:navlist.item icon="archive-box-x-mark" :href="route('documents.rejected')" :current="request()->routeIs('documents.rejected')" wire:navigate>{{ __('Rejected') }}</flux:navlist.item>
                     <flux:navlist.item icon="trash" :href="route('documents.trashed')" :current="request()->routeIs('documents.trashed')" wire:navigate>{{ __('Trashed Document') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>

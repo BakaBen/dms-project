@@ -28,6 +28,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('documents', DocumentController::class);
     Route::resource('comments', CommentController::class);
+    Route::get('/published', [DocumentController::class, 'published'])->name('documents.published');
+    Route::get('/rejected', [DocumentController::class, 'rejected'])->name('documents.rejected');
 
     Route::get('/trashed', [DocumentController::class, 'trashed'])->name('documents.trashed');
     Route::post('/documents/{document}/restore', [DocumentController::class, 'restore'])->name('documents.restore');
@@ -38,6 +40,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/documents/rollback/{document}', [DocumentController::class, 'rollback'])->name('documents.rollback');
     Route::get('/documents/{document}/previous', [DocumentController::class, 'previous'])->name('documents.previous');
     Route::get('/documents/{document}/previous/{version}', [DocumentController::class, 'showPrevious'])->name('documents.show.previous');
+
+    Route::post('/documents/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
+    Route::post('/documents/{document}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
+
+    Route::post('/documents/{document}/enable-approval', [DocumentController::class, 'enableApproval'])->name('documents.enableApproval');
+    Route::post('/documents/{document}/disable-approval', [DocumentController::class, 'disableApproval'])->name('documents.disableApproval');
 
 });
 

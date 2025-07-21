@@ -9,9 +9,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Traits\HasRoles;
 
 class DocumentController extends Controller
 {
+    use HasRoles;
     /**
      * Display a listing of the resource.
      */
@@ -19,6 +21,18 @@ class DocumentController extends Controller
     {
         $documents = Document::where('status', 'unvalidated')->paginate(10);
         return view('documents.index', compact('documents'));
+    }
+
+    public function published()
+    {
+        $documents = Document::where('status', 'approved')->paginate(10);
+        return view('documents.published', compact('documents'));
+    }
+
+    public function rejected()
+    {
+        $documents = Document::where('status', 'rejected')->paginate(10);
+        return view('documents.rejected', compact('documents'));
     }
 
     /**
@@ -202,7 +216,7 @@ class DocumentController extends Controller
         }
 
         try {
-            $validatedData = $request->validate([
+            $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
             'file' => 'nullable|file|mimes:pdf, docx, xlsx, pptx|max:10240', //max 10 MB
@@ -225,7 +239,13 @@ class DocumentController extends Controller
                         'current_version_id' => $version->id,
                         'file_path' => $path
                     ]);
-
+                    
+            //set approval to unvalidated
+            $document->status = 'unvalidated';
+            $document->reject_notes = null;
+            $document->is_approvable = false;
+            $document->save();
+                    
             DocumentLog::create([
                 'document_id' => $document->id,
                 'user_id' => Auth::user()->id,
@@ -233,13 +253,74 @@ class DocumentController extends Controller
                 'description' => 'Dokumen diperbarui dengan versi ' . $version->version_number
             ]);
 
+
             return redirect()->route('documents.index')->with([
                 'status' => 'success',
                 'message' => 'Document updated successfully.'
             ]);
         } catch (\Exception $e) {
-            return redirect()->withError($e->getMessage())->route('documents.edit', $document)->with(['status' => 'error', 'message' => 'Failed to update document.']);
+            return redirect()->back()->withError($e->getMessage())->route('documents.edit', $document)->with(['status' => 'error', 'message' => 'Failed to update document.']);
         }
+    }
+
+    public function enableApproval(Document $document)
+    {
+        // Cek apakah user admin
+        // if (!Auth::user()->hasRole('admin')) {
+        //     abort(403);
+        // }
+
+        $document->is_approvable = true;
+        $document->save();
+
+        return back()->with('success', 'Approval diaktifkan untuk dokumen ini.');
+    }
+
+    public function disableApproval(Document $document)
+    {
+        // Cek apakah user admin
+        // if (!Auth::user()->hasRole('admin')) {
+        //     abort(403);
+        // }
+
+        $document->is_approvable = false;
+        $document->save();
+
+        return back()->with('success', 'Approval dinonaktifkan.');
+    }
+
+
+
+    public function approve(Document $document)
+    {
+        if ($document->status !== 'unvalidated') {
+            return back()->with('error', 'Document has already been processed.');
+        }
+
+        $document->status = 'approved';
+        $document->reject_notes = null;
+        $document->is_approvable = false;
+        $document->save();
+
+        return redirect()->route('documents.published')->with('success', 'Document has been approved.');
+    }
+
+    public function reject(Request $request, Document $document)
+    {
+        if ($document->status !== 'unvalidated') {
+            return back()->with('error', 'Document has already been processed.');
+        }
+
+        $request->validate([
+            'reject_notes' => 'required|string|max:1000',
+        ]);
+
+        $document->status = 'rejected';
+        $document->reject_notes = $request->reject_notes;
+        $document->is_approvable = false;
+        $document->save();
+
+        return redirect()->route('documents.rejected')->with('success', 'Document has been rejected.');
     }
 
     /**

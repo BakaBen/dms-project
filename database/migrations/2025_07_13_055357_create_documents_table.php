@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->enum('status', ['unvalidated', 'approved', 'rejected'])->default('unvalidated');
+            $table->boolean('is_approvable')->default(false);
+            $table->string('reject_notes')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('file_path')->nullable();
             $table->timestamps();

@@ -37,15 +37,48 @@
                 <flux:heading>Status</flux:heading>
                 @if ($document->status == 'unvalidated')
                     <flux:badge class="mt-4" color="yellow">Unvalidated</flux:badge>
-                @elseif ($document->status == 'validated')
-                    <flux:badge class="mt-4" color="green">Validated</flux:badge>
+                @elseif ($document->status == 'approved')
+                    <flux:badge class="mt-4" color="green">Approved</flux:badge>
                 @elseif ($document->status == 'rejected')
                     <flux:badge class="mt-4" color="red">Rejected</flux:badge>
+                    <div class="col-span-2 grid grid-cols-subgrid py-4">
+                        <flux:heading>Reason</flux:heading>
+                        <flux:text>{{ $document->reject_notes }}</flux:text>
+                    </div>
                 @else
                     <flux:badge class="mt-4" color="blue">No Status</flux:badge>    
                 @endif
             </div>
         </div>
+        @if($document->status === 'unvalidated' && $document->is_approvable)
+        @can('approve document')
+            <form method="POST" action="{{ route('documents.approve', $document) }}" style="display:inline-block;">
+                @csrf
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Setujui</button>
+            </form>
+        @endcan
+
+        @can('reject document')
+            {{-- Tombol tolak tampilkan kolom komentar saat diklik --}}
+            <button onclick="toggleRejectForm()" class="bg-red-600 text-white  px-4 py-2 rounded">Tolak</button>
+
+            {{-- Form reject tersembunyi awalnya --}}
+            <form method="POST" action="{{ route('documents.reject', $document) }}" id="reject-form" style="display: none; margin-top: 10px;">
+                @csrf
+                <label for="reject_notes">Alasan Penolakan:</label>
+                <textarea name="reject_notes" id="reject_notes" required class="w-full border rounded p-2 mt-2 text-black" placeholder="Tulis alasan penolakan di sini..."></textarea>
+                <br>
+                <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded mt-2">Kirim Penolakan</button>
+            </form>
+
+            <script>
+                function toggleRejectForm() {
+                    const form = document.getElementById('reject-form');
+                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                }
+            </script>
+        @endcan
+        @endif
         <div class="mt-4">
             <iframe src="{{ asset('storage/' . $document->file_path) }}" width="100%" height="600px"></iframe>
         </div>
