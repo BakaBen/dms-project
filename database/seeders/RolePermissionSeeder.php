@@ -36,11 +36,11 @@ class RolePermissionSeeder extends Seeder
         Permission::create(['name' => 'delete documents']);
         Permission::create(['name' => 'restore documents']);
         Permission::create(['name' => 'force delete documents']);
+        Permission::create(['name' => 'view previous versions']);
+        Permission::create(['name' => 'rollback documents']);
 
         Permission::create(['name' => 'update approval']);
         Permission::create(['name' => 'update rejection']);
-
-        Permission::create(['name' => 'create revisions']);
 
         Role::create(['name' => 'admin'])->givePermissionTo(Permission::all());
     }

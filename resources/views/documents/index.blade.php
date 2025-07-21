@@ -50,25 +50,41 @@
                         {{ $document->user->name ?? '-' }}
                     </td>
                     <td class="flex items-center gap-2 px-6 py-4">
-                        @can('read documents')
-                        <a href="{{ route('documents.show', $document) }}" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">View</a>
-                        @endcan
-                        @can('update documents')
-                        <a href="{{ route('documents.edit', $document) }}" class="text-yellow-400 hover:text-white border border-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900">Revision</a>
-                        @endcan
-                        @can('delete documents')
-                        <form action="{{ route('documents.destroy', $document->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
-                        @endcan
-                        @can('create revisions')
-                        <form action="{{ route('documents.rollback', $document->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" onclick="return confirm('Are you sure you want to rollback to the previous version?')">Rollback</button>
-                        </form>
-                        @endcan
+                        <flux:dropdown>
+                            <flux:button icon:trailing="chevron-down">Action</flux:button>
+                            <flux:menu>
+                                @can('read documents')
+                                <flux:menu.item href="{{ route('documents.show', $document) }}" icon="eye">View</flux:menu.item>
+                                @endcan
+                                @can('update documents')
+                                <flux:menu.item href="{{ route('documents.edit', $document) }}" icon="pencil">Revision</flux:menu.item>
+                                @endcan
+                                @can('rollback documents')
+                                <form id="rollback-form-{{ $document->id }}" action="{{ route('documents.rollback', $document) }}" method="POST">
+                                    @csrf
+                                    <flux:menu.item 
+                                        icon="arrow-path" 
+                                        onclick="event.preventDefault(); if(confirm('Are you sure you want to rollback?')) { document.getElementById('rollback-form-{{ $document->id }}').submit(); }">
+                                        Rollback
+                                    </flux:menu.item>
+                                </form>
+                                @endcan
+                                @can('view previous versions')
+                                <flux:menu.item href="{{ route('documents.previous', $document) }}" icon="arrow-left">Previous Version</flux:menu.item>
+                                @endcan
+                                @can('delete documents')
+                                <form id="delete-form-{{ $document->id }}" action="{{ route('documents.destroy', $document) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <flux:menu.item 
+                                        icon="trash" 
+                                        onclick="event.preventDefault(); if(confirm('Are you sure you want to delete?')) { document.getElementById('delete-form-{{ $document->id }}').submit(); }">
+                                        Delete
+                                    </flux:menu.item>
+                                </form>
+                                @endcan
+                            </flux:menu>
+                        </flux:dropdown>
                     </td>
                 </tr>
                 @endforeach

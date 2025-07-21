@@ -43,7 +43,7 @@ class DocumentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'required|file|mimes:pdf|max:10240', // maks 10MB
+            'file' => 'required|file|mimes:pdf, docx, xlsx, pptx|max:10240', // maks 10MB
         ]);
 
         try {
@@ -128,20 +128,57 @@ class DocumentController extends Controller
         ]);
     }
 
+    public function previous(Document $document) {
+        $previousVersion = DocumentVersion::where('document_id', $document->id)
+            ->where('version_number', '<', $document->currentVersion->version_number)
+            ->orderBy('version_number', 'desc')
+            ->get();
+
+        if (!$previousVersion) {
+            return redirect()->back()->with([
+                'status' => 'error',
+                'message' => 'No previous version available.'
+            ]);
+        }
+
+        return view('documents.previous', compact('document', 'previousVersion'));
+    }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(Document $document)
+    public function show(Document $document, $version = null)
     {
         $document->load(['user', 'comments.user']);
         $document->comments = $document->comments->sortByDesc('created_at');
 
         $document = Document::with('currentVersion')->findOrFail($document->id);
-        // $document->current_version_id;
 
         return view('documents.show', compact('document'));
     }
+
+    public function showPrevious(Document $document, $version = null)
+    {
+        if ($version !== null) {
+            $version = DocumentVersion::where('document_id', $document->id)
+                ->where('id', $version)
+                ->first();
+
+            if (!$version) {
+                return redirect()->back()->with(['status' => 'error', 'message' => 'Version not found.']);
+            }
+        } else {
+            // Default ke versi saat ini jika tidak ada parameter versi
+            $version = $document->currentVersion;
+        }
+
+        $document->load(['user', 'comments.user', 'currentVersion']);
+        $document->comments = $document->comments->sortByDesc('created_at');
+
+        return view('documents.show-previous', compact('document', 'version'));
+    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -168,7 +205,7 @@ class DocumentController extends Controller
             $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'nullable|file|mimes:pdf|max:10240', //max 10 MB
+            'file' => 'nullable|file|mimes:pdf, docx, xlsx, pptx|max:10240', //max 10 MB
         ]);
 
         $path = $request->file('file')->store('documents', 'public');

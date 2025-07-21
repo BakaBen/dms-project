@@ -36,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/preview/{document}', [DocumentController::class, 'preview'])->name('documents.preview');
 
     Route::post('/documents/rollback/{document}', [DocumentController::class, 'rollback'])->name('documents.rollback');
+    Route::get('/documents/{document}/previous', [DocumentController::class, 'previous'])->name('documents.previous');
+    Route::get('/documents/{document}/previous/{version}', [DocumentController::class, 'showPrevious'])->name('documents.show.previous');
 
 });
 
