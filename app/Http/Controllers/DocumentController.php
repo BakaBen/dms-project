@@ -57,7 +57,7 @@ class DocumentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'required|file|mimes:pdf, docx, xlsx, pptx|max:10240', // maks 10MB
+            'file' => 'required|file|mimes:pdf,docx,xlsx,pptx|max:10240', // maks 10MB
         ]);
 
         try {
@@ -219,7 +219,7 @@ class DocumentController extends Controller
             $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
-            'file' => 'nullable|file|mimes:pdf, docx, xlsx, pptx|max:10240', //max 10 MB
+            'file' => 'nullable|file|mimes:pdf,docx,xlsx,pptx|max:10240', //max 10 MB
         ]);
 
         $path = $request->file('file')->store('documents', 'public');

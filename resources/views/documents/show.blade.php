@@ -54,21 +54,21 @@
         @can('approve document')
             <form method="POST" action="{{ route('documents.approve', $document) }}" style="display:inline-block;">
                 @csrf
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Setujui</button>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Approve</button>
             </form>
         @endcan
 
         @can('reject document')
             {{-- Tombol tolak tampilkan kolom komentar saat diklik --}}
-            <button onclick="toggleRejectForm()" class="bg-red-600 text-white  px-4 py-2 rounded">Tolak</button>
+            <button onclick="toggleRejectForm()" class="bg-red-600 text-white  px-4 py-2 rounded">Reject</button>
 
             {{-- Form reject tersembunyi awalnya --}}
             <form method="POST" action="{{ route('documents.reject', $document) }}" id="reject-form" style="display: none; margin-top: 10px;">
                 @csrf
-                <label for="reject_notes">Alasan Penolakan:</label>
-                <textarea name="reject_notes" id="reject_notes" required class="w-full border rounded p-2 mt-2 text-black" placeholder="Tulis alasan penolakan di sini..."></textarea>
+                <label for="reject_notes">Rejection Notes:</label>
+                <textarea name="reject_notes" id="reject_notes" required class="w-full border rounded p-2 mt-2 text-black" placeholder="Write your rejection notes here"></textarea>
                 <br>
-                <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded mt-2">Kirim Penolakan</button>
+                <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded mt-2">Send Rejection Note</button>
             </form>
 
             <script>
@@ -79,9 +79,26 @@
             </script>
         @endcan
         @endif
-        <div class="mt-4">
+        <!-- <div class="mt-4">
             <iframe src="{{ asset('storage/' . $document->file_path) }}" width="100%" height="600px"></iframe>
-        </div>
+        </div> -->
+
+        @php
+            $fileExtension = pathinfo($document->file_path, PATHINFO_EXTENSION);
+        @endphp
+
+        @if (strtolower($fileExtension) === 'pdf')
+            <div class="mt-4">
+                <iframe src="{{ asset('storage/' . $document->file_path) }}" width="100%" height="600px"></iframe>
+            </div>
+        @else
+            <div class="mt-4">
+                <p><strong>No preview available for this file type.</strong></p>
+                <a href="{{ asset('storage/' . $document->file_path) }}" class="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" download>
+                    Download Document
+                </a>
+            </div>
+        @endif
     </div>
 
     @include('comment')

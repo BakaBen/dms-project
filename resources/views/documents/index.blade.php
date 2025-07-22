@@ -21,6 +21,11 @@
                     <th scope="col" class="px-6 py-3">
                         Status
                     </th>
+                    @can('activate approval')
+                    <th scope="col" class="px-6 py-3">
+                        Approval Status
+                    </th>
+                    @endcan
                     <th scope="col" class="px-6 py-3">
                         Author
                     </th>
@@ -46,6 +51,17 @@
                             <flux:badge color="blue">No Status</flux:badge>    
                         @endif
                     </td>
+                    @can('activate approval')
+                    <td class="px-6 py-4">
+                        @if ($document->is_approvable == 1)
+                            <flux:badge color="green">Active</flux:badge>
+                        @elseif ($document->is_approvable == 0)
+                            <flux:badge color="red">Inactive</flux:badge>
+                        @else
+                            <flux:badge color="blue">No Status</flux:badge>    
+                        @endif
+                    </td>
+                    @endcan
                     <td class="px-6 py-4">
                         {{ $document->user->name ?? '-' }}
                     </td>

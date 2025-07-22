@@ -47,9 +47,26 @@
             </div>
         </div>
 
-        <div class="mt-4">
+        <!-- <div class="mt-4">
             <iframe src="{{ asset('storage/' . $version->file_path) }}" width="100%" height="600px"></iframe>
-        </div>
+        </div> -->
+
+        @php
+            $fileExtension = pathinfo($version->file_path, PATHINFO_EXTENSION);
+        @endphp
+
+        @if (strtolower($fileExtension) === 'pdf')
+            <div class="mt-4">
+                <iframe src="{{ asset('storage/' . $version->file_path) }}" width="100%" height="600px"></iframe>
+            </div>
+        @else
+            <div class="mt-4">
+                <p><strong>No preview available for this file type.</strong></p>
+                <a href="{{ asset('storage/' . $version->file_path) }}" class="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" download>
+                    Download Document
+                </a>
+            </div>
+        @endif
     </div>
 
     @include('comment')

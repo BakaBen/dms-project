@@ -24,7 +24,7 @@
             <flux:textarea label="Document Description" name="description">
                 {{ old('description') }}
             </flux:textarea>
-            <flux:input label="File" description="File must be in PDF format" type="file" name="file" value="{{ old('file') }}" />
+            <flux:input label="File" description="Supported file types: .pdf, .docx, .xlsx, .pptx" type="file" name="file" value="{{ old('file') }}" />
         </div>
 
         <div class="flex justify-between items-center mt-10">

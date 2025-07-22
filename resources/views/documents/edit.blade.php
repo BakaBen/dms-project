@@ -25,7 +25,7 @@
             <flux:textarea label="Document Description" name="description">
                 {{ old('description', $document->description) }}
             </flux:textarea>
-            <flux:input label="File" type="file" name="file" value="{{ old('file_path', $document->file_path) }}" />
+            <flux:input label="File" description="Supported file types: .pdf, .docx, .xlsx, .pptx" type="file" name="file" value="{{ old('file_path', $document->file_path) }}" />
         </div>
 
         <div class="flex justify-between items-center mt-10">
