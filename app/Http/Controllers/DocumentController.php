@@ -105,7 +105,7 @@ class DocumentController extends Controller
      * Rollback document
      */
     public function rollback(Document $document) {
-        if (Auth::id() !== $document->user_id) {
+        if (!Auth::check()) {
             return redirect()->route('documents.index')->with(['status' => 'error', 'message' => 'You are not authorized to edit this document.']);
         }
 
@@ -139,6 +139,30 @@ class DocumentController extends Controller
         return redirect()->back()->with([
             'status' => 'success',
             'message' => "Document rolled back to version {$previousVersion->version_number}"
+        ]);
+    }
+
+    public function allVersions(Document $document) 
+    {
+        $versions = DocumentVersion::where('document_id', $document->id)->orderBy('version_number', 'desc')->get();
+        return view('documents.versions', compact('document', 'versions'));
+    }
+
+    public function reactivate(Document $document) 
+    {
+        if(!Auth::check() && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            return redirect()->route('documents.index')->with(['status' => 'error', 'message' => 'You are not authorized to reactivate this document.']);
+        }
+
+        $latestVersion = DocumentVersion::where('document_id', $document->id)->orderBy('version_number', 'desc')->first();
+        $document->update([
+            'current_version_id' => $latestVersion->id,
+            'file_path' => $latestVersion->file_path
+        ]);
+
+        return redirect()->back()->with([
+            'status' => 'success',
+            'message' => 'Document reactivated successfully.'
         ]);
     }
 
@@ -328,7 +352,7 @@ class DocumentController extends Controller
      */
     public function destroy(Document $document)
     {
-        if (Auth::id() !== $document->user_id && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+        if (!Auth::check() && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
             return redirect()->route('documents.index')->with(['status' => 'error', 'message' => 'You are not authorized to delete this document.']);
         }
 

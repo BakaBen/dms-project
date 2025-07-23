@@ -85,6 +85,15 @@
                                     </flux:menu.item>
                                 </form>
                                 @endcan
+                                <form id="reactivate-form-{{ $document->id }}" action="{{ route('documents.reactivate', $document) }}" method="POST">
+                                    @csrf
+                                    <flux:menu.item 
+                                        icon="arrow-right-start-on-rectangle" 
+                                        onclick="event.preventDefault(); if(confirm('Are you sure you want to reactivate latest version?')) { document.getElementById('reactivate-form-{{ $document->id }}').submit(); }">
+                                        Reactivate
+                                    </flux:menu.item>
+                                </form>
+                                <flux:menu.item href="{{ route('documents.versions', $document) }}" icon="document-text">View All Version</flux:menu.item>
                                 @can('view previous versions')
                                 <flux:menu.item href="{{ route('documents.previous', $document) }}" icon="arrow-left">Previous Version</flux:menu.item>
                                 @endcan

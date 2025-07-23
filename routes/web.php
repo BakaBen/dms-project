@@ -11,7 +11,7 @@ use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 })->name('home');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/preview/{document}', [DocumentController::class, 'preview'])->name('documents.preview');
 
     Route::post('/documents/rollback/{document}', [DocumentController::class, 'rollback'])->name('documents.rollback');
+    Route::get('/documents/{document}/versions', [DocumentController::class, 'allVersions'])->name('documents.versions');
+    Route::post('/documents/{document}/reactivate', [DocumentController::class, 'reactivate'])->name('documents.reactivate');
     Route::get('/documents/{document}/previous', [DocumentController::class, 'previous'])->name('documents.previous');
     Route::get('/documents/{document}/previous/{version}', [DocumentController::class, 'showPrevious'])->name('documents.show.previous');
 
