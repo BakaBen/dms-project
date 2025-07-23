@@ -63,6 +63,7 @@
                                     </flux:menu.item>
                                 </form>
                                 @endcan
+                                @can('reactivate documents')
                                 <form id="reactivate-form-{{ $document->id }}" action="{{ route('documents.reactivate', $document) }}" method="POST">
                                     @csrf
                                     <flux:menu.item 
@@ -71,7 +72,10 @@
                                         Reactivate
                                     </flux:menu.item>
                                 </form>
+                                @endcan
+                                @can('view all versions')
                                 <flux:menu.item href="{{ route('documents.versions', $document) }}" icon="document-text">View All Version</flux:menu.item>
+                                @endcan
                                 @can('view previous versions')
                                 <flux:menu.item href="{{ route('documents.previous', $document) }}" icon="arrow-left">Previous Version</flux:menu.item>
                                 @endcan

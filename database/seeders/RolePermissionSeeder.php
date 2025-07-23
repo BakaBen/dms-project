@@ -44,7 +44,7 @@ class RolePermissionSeeder extends Seeder
 
         Permission::create(['name' => 'activate approval']);
 
-        Permission::create(['name' => 'reactivate document']);
+        Permission::create(['name' => 'reactivate documents']);
         Permission::create(['name' => 'view all versions']);
 
         Role::create(['name' => 'admin'])->givePermissionTo(Permission::all());

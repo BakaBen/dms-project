@@ -8,7 +8,7 @@
     <div class="flex w-full flex-1 flex-col mt-4 gap-4 rounded-xl">
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <div class="relative h-32 w-full aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <a href="{{ route('documents.index') }}" class="block w-full h-full p-6 bg-white rounded-lg shadow-sm hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+                <a href="{{ route('documents.published') }}" class="block w-full h-full p-6 bg-white rounded-lg shadow-sm hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     <flux:heading size="lg">Published Documents</flux:heading>
                     <div class="flex justify-between items-center">
                         <div>
@@ -35,7 +35,7 @@
                 </a>
             </div>
             <div class="relative h-32 w-full aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <a href="{{ route('documents.index') }}" class="block w-full h-full p-6 bg-white rounded-lg shadow-sm hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+                <a href="{{ route('documents.rejected') }}" class="block w-full h-full p-6 bg-white rounded-lg shadow-sm hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     <flux:heading size="lg">Rejected Documents</flux:heading>
                     <div class="flex justify-between items-center">
                         <div>
