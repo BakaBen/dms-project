@@ -101,5 +101,9 @@
         @endif
     </div>
 
-    @include('comment')
+    @if($document->status == 'approved')
+        <div class="mt-4"></div>
+    @else
+        @include('comment')
+    @endif
 </x-layouts.app>

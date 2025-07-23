@@ -352,13 +352,13 @@ class DocumentController extends Controller
      */
     public function destroy(Document $document)
     {
-        if (!Auth::check() && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+        if (!Auth::check() && !in_array(Auth::user()->role, ['admin'])) {
             return redirect()->route('documents.index')->with(['status' => 'error', 'message' => 'You are not authorized to delete this document.']);
         }
 
         $document->delete();
 
-        return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document deleted successfully.']);
+        return redirect()->back()->with(['status' => 'success', 'message' => 'Document deleted successfully.']);
     }
 
     public function trashed(Request $request)
@@ -371,7 +371,7 @@ class DocumentController extends Controller
     {
         $document = Document::onlyTrashed()->findOrFail($id);
         $document->restore();
-        return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document restored successfully.']);
+        return redirect()->back()->with(['status' => 'success', 'message' => 'Document restored successfully.']);
     }
 
     public function forceDelete($id)
@@ -383,6 +383,6 @@ class DocumentController extends Controller
         }
 
         $document->forceDelete();
-        return redirect()->route('documents.index')->with(['status' => 'success', 'message' => 'Document deleted permanently.']);
+        return redirect()->back()->with(['status' => 'success', 'message' => 'Document deleted permanently.']);
     }
 }
